@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ t('changes') }} · Seven{% endblock %}
+{% block body %}
+<h1>{{ t('changes') }}</h1>
+<p class="sub">{% if lang=='en' %}What your competitors changed in the last 30 days.{% else %}ما غيّره منافسوك خلال آخر 30 يومًا.{% endif %}</p>
+<div class="chips" role="group">
+  {% for k in ['', 'drops', 'soldout', 'new', 'other'] %}
+  <a href="?kind={{ k }}{% if s %}&s={{ q(s) }}{% endif %}" {% if kind==k %}aria-current="true"{% endif %}>{{ t(k or 'all') }}</a>
+  {% endfor %}
+  {% if watched|length > 1 %}
+  {% for w in watched %}<a href="?s={{ q(w.store) }}{% if kind %}&kind={{ kind }}{% endif %}" {% if s==w.store %}aria-current="true"{% endif %}>{{ w.label }}</a>{% endfor %}
+  {% endif %}
+</div>
+{% if not watched %}<p class="empty">{{ t('empty_competitors') }} <a href="{{ base }}/competitors">{{ t('add_competitor') }}</a></p>
+{% elif not days %}<p class="empty">{{ t('empty_changes') }}</p>
+{% else %}
+{% for day, items in days.items() %}
+<h2 class="day">{{ day }}</h2>
+<ol class="feed">
+  {% for it in items %}
+  <li class="g-{{ it.group }}">
+    <span class="line1">{{ it.store_label }} · <span class="kind">{{ t('k_' + it.e.kind) }}</span> · {{ it.time }}</span>
+    <a class="title" href="{{ base }}/product?s={{ q(it.store) }}&p={{ q(it.e.product_id) }}">{{ it.title }}</a>
+    {% if it.priced %}
+    <span class="tag {{ 'hot' if it.group=='drops' }}"><span class="now">{{ money(it.e.new) }}</span>{% if it.e.old is not none and it.e.kind != 'new_product' %}<span class="was">{{ money(it.e.old) }}</span>{% endif %}{% if it.e.pct is not none %}<span class="pct" dir="ltr">{{ '%+.0f'|format(it.e.pct) }}%</span>{% endif %}</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% endfor %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ t('competitors') }} · Seven{% endblock %}
+{% block body %}
+<h1>{{ t('competitors') }}</h1>
+{% if note %}<p class="note {% if note=='bad_link' %}bad{% endif %}" role="status">{{ t(note) }}</p>{% endif %}
+<form class="inline" method="post" action="{{ base }}/competitors">
+  <label class="grow">{{ t('store_link') }}<input name="url" required placeholder="salla.sa/store · mystore.com" inputmode="url" autocomplete="off"></label>
+  <label>{{ t('name_optional') }}<input name="label" maxlength="60"></label>
+  <button type="submit">{{ t('add_competitor') }}</button>
+</form>
+<h2>{% if lang=='en' %}You follow {{ watched|length }} stores{% else %}عدد المتاجر التي تتابعها: {{ watched|length }}{% endif %}</h2>
+{% if not watched %}<p class="empty">{{ t('empty_competitors') }}</p>{% endif %}
+<ul class="rivals">
+  {% for w in watched %}
+  <li>
+    <div class="grow">
+      <a class="rival-name" href="{{ base }}/store?s={{ q(w.store) }}">{{ w.label }}</a>
+      <div class="meta">
+        {% if not w.last_read %}{{ t('not_read_yet') }}
+        {% else %}<b>{{ '{:,}'.format(w.products) }}</b> {{ t('products') }}
+          · <span class="hot">{{ '{:,}'.format(w.on_sale) }} {{ t('on_sale') }}</span>
+          · {{ '{:,}'.format(w.sold_out) }} {{ t('sold_out_n') }}
+          · {{ t(w.platform or 'unknown') }} · {{ t('last_read') }} {{ ago(w.last_read) }}
+          {% if w.last_error and not w.products %}<br><span class="hot">{{ t('read_failed') }}</span>{% endif %}
+        {% endif %}
+      </div>
+    </div>
+    <form method="post" action="{{ base }}/competitors/remove"><input type="hidden" name="store_key" value="{{ w.store }}"><button class="quiet" type="submit">{{ t('remove') }}</button></form>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

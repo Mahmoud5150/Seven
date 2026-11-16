@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ w.label }} · Seven{% endblock %}
+{% block body %}
+<a class="back" href="{{ base }}/competitors">{{ t('back') }}</a>
+<h1>{{ w.label }}</h1>
+<p class="sub">{{ '{:,}'.format(w.products) }} {{ t('products') }} · {{ '{:,}'.format(w.on_sale) }} {{ t('on_sale') }} · {{ t(w.platform or 'unknown') }}</p>
+<form class="controls" method="get">
+  <input type="hidden" name="s" value="{{ s }}">
+  <input type="search" name="q" value="{{ qtext }}" placeholder="{{ t('search') }}" aria-label="{{ t('search') }}">
+  <select name="only" aria-label="{{ t('all') }}" onchange="this.form.submit()">
+    <option value="" {% if not only %}selected{% endif %}>{{ t('all') }}</option>
+    <option value="sale" {% if only=='sale' %}selected{% endif %}>{{ t('on_sale') }}</option>
+    <option value="soldout" {% if only=='soldout' %}selected{% endif %}>{{ t('out_of_stock') }}</option>
+  </select>
+  <select name="sort" aria-label="sort" onchange="this.form.submit()">
+    {% for k in ['title','price','price_desc','discount'] %}<option value="{{ k }}" {% if sort==k %}selected{% endif %}>{{ t('sort_' + k) }}</option>{% endfor %}
+  </select>
+</form>
+{% if not items %}<p class="empty">{{ t('no_results') if qtext or only else t('not_read_yet') }}</p>{% else %}
+<table class="cat">
+  <thead><tr><th>{{ t('sort_title') }}</th><th>{{ t('sar') }}</th><th>{{ t('in_stock') }}</th></tr></thead>
+  <tbody>
+  {% for p in items %}
+  {% set sale = p.regular_price and p.price and p.regular_price > p.price %}
+  <tr>
+    <td><a href="{{ base }}/product?s={{ q(s) }}&p={{ q(p.product_id) }}">{{ p.title }}</a></td>
+    <td class="num"><span class="pp"><span class="{{ 'sale' if sale }}">{{ money(p.price) }}</span>{% if sale %}<span class="was">{{ money(p.regular_price) }}</span>{% endif %}</span></td>
+    <td>{% if p.in_stock is none %}<span class="stock-x">{{ t('stock_unknown') }}</span>{% elif p.in_stock %}{{ t('in_stock') }}{% else %}<span class="stock-0">{{ t('out_of_stock') }}</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if items|length == 500 %}<p class="sub">{{ t('showing') }} 500 {{ t('of') }} {{ '{:,}'.format(w.products) }}</p>{% endif %}
+{% endif %}
+{% endblock %}

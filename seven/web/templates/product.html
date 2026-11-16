@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ prod.title }} · Seven{% endblock %}
+{% block body %}
+<a class="back" href="{{ base }}/store?s={{ q(s) }}">{{ w.label }}</a>
+<h1>{{ prod.title }}</h1>
+{% set sale = prod.regular_price and prod.price and prod.regular_price > prod.price %}
+<div class="price-big"><span class="now {{ 'sale' if sale }}">{{ money(prod.price) }} {{ t('sar') }}</span>{% if sale %}<span class="was">{{ money(prod.regular_price) }}</span>{% endif %}</div>
+<p class="sub">{% if prod.in_stock is none %}{{ t('stock_unknown') }}{% elif prod.in_stock %}{{ t('in_stock') }}{% else %}<span class="stock-0">{{ t('out_of_stock') }}</span>{% endif %}
+{% if prod.url %} · <a href="{{ prod.url }}" target="_blank" rel="noopener noreferrer">{{ t('open_in_store') }}</a>{% endif %}</p>
+{% if chart %}<h2>{{ t('price_history') }}</h2>{{ chart|safe }}{% endif %}
+<h2>{{ t('this_product') }}</h2>
+{% if not changes %}<p class="empty">{{ t('empty_changes') }}</p>{% else %}
+<ol class="feed">{% for c in changes %}<li><span class="what">{{ c.text }}</span><span class="when">{{ c.at }}</span></li>{% endfor %}</ol>
+{% endif %}
+{% endblock %}
