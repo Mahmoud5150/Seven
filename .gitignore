@@ -1,0 +1,10 @@
+*.db
+.env
+.pytest_cache/
+.venv/
+__pycache__/
+_to_delete/
+backups/
+debug/
+outbox.jsonl
+reports/
