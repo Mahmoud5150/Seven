@@ -1,0 +1,3 @@
+-r requirements.txt
+# Lets the test suite run every storage test on a real PostgreSQL too (embedded server).
+pgserver>=0.1
