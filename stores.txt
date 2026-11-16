@@ -1,0 +1,32 @@
+# Spike store list: one store link per line. Anything after # is a comment.
+# All 20 checked live on 2026-11-17 in a browser: platform confirmed and the
+# reader's first request returned priced products (numbers in the comments).
+# Sources: Store Leads "top stores in Saudi Arabia" lists + the two README examples.
+
+# --- Salla (10) --- first API page: 15/15 priced, stock flag on all
+salla.sa/coffee_souq        # specialty coffee; redirects to coffeesouq1.com; 450+ products, 108 on sale
+beyyak.com                  # specialty coffee (Riyadh)
+coffeecottagesa.com         # coffee (Mecca)
+artist-shop1.com            # art supplies (Mecca)
+melen.sa                    # bedding; whole first page on sale
+harafina.com                # meat and sacrifices
+family.sa                   # fashion and kidswear
+villagemarket.com.sa        # grocery
+eitara.com                  # herbs and spices
+abyati.sa                   # home goods (Tabuk)
+
+# --- Zid (5) --- all have sitemap_products.xml + window.productObj on product pages
+oav.zid.store               # abayas; 85 products (small, quick)
+dkhoonemirates.com          # oud and incense; 109 products
+thebeautysecrets.com        # perfume and care; 617 products
+alfajr.com                  # luxury watches; 84 products
+pcpalace.com.sa             # laptops and PC; 5,000+ products: tests --max and cost
+
+# --- Shopify (5) --- /products.json open, prices in SAR
+wheelsbikes.com             # bikes; 808 variants on page 1, 361 sold out
+gazzaz.com.sa               # perfume and beauty; heavy discounting
+sidalih.com                 # pharmacy and beauty
+alephksa.com                # Apple partner; 116 of 250 sold out
+fayendra.com                # silver jewellery; every variant has a compare-at price
+
+# Spare candidates (also verified): hassm.com (Salla), care-outlet.com (Zid, 5,000+)

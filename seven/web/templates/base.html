@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ 'ltr' if lang == 'en' else 'rtl' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Seven{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14302F; --ink-2:#4A5C5B; --ink-3:#7B8A89; --ground:#F2F4F3; --surface:#FFFFFF; --line:#DCE2E0;
+  --drop:#B8326A; --drop-soft:#F8E8EF; --out:#4F5592; --out-soft:#ECEDF6; --new:#2F7D5B; --new-soft:#E5F2EB;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.6;
+  font-variant-numeric:tabular-nums}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--drop);outline-offset:2px;border-radius:4px}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px}
+header.top{background:var(--ink);color:#fff}
+header.top .wrap{display:flex;align-items:center;gap:20px;min-height:64px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:1.25rem;letter-spacing:.01em;text-decoration:none}
+.who{color:#B9C7C5;font-size:.9rem}
+nav.tabs{display:flex;gap:4px;margin-inline-start:auto}
+nav.tabs a{text-decoration:none;padding:8px 14px;border-radius:999px;color:#D5DEDD;font-weight:500}
+nav.tabs a[aria-current=page]{background:#fff;color:var(--ink)}
+.lang{color:#B9C7C5;font-size:.85rem;text-decoration:none;border:1px solid #3B5654;padding:4px 10px;border-radius:999px}
+main{padding:28px 0 64px}
+h1{font-size:1.75rem;line-height:1.25;margin:0 0 6px;font-weight:700}
+h2{font-size:1.15rem;margin:32px 0 10px;font-weight:600}
+.sub{color:var(--ink-2);margin:0 0 20px}
+.note{background:var(--surface);border-inline-start:4px solid var(--new);padding:10px 14px;border-radius:6px;margin:0 0 18px}
+.note.bad{border-color:var(--drop)}
+.empty{background:var(--surface);border:1px dashed var(--line);padding:28px;border-radius:var(--radius);color:var(--ink-2)}
+/* filter chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.chips a{text-decoration:none;padding:6px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:.92rem}
+.chips a[aria-current=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+/* changes feed: who · what kind · when, the product, and the price tag */
+ol.feed{list-style:none;margin:0;padding:0;background:var(--surface);border-radius:var(--radius)}
+ol.feed li{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 20px;padding:14px 18px;border-bottom:1px solid var(--line)}
+ol.feed li:last-child{border-bottom:0}
+.line1{grid-column:1;color:var(--ink-3);font-size:.86rem}
+.line1 .kind{font-weight:600;color:var(--ink-2)}
+.g-drops .kind{color:var(--drop)} .g-soldout .kind{color:var(--out)} .g-new .kind{color:var(--new)}
+ol.feed .title{grid-column:1;font-weight:500;text-decoration:none}
+ol.feed .title:hover{text-decoration:underline}
+.what{font-weight:500}
+.when{color:var(--ink-3);font-size:.85rem}
+.day{margin:26px 0 8px;color:var(--ink-3);font-weight:600;font-size:.9rem}
+/* the price tag: the one loud thing */
+.tag{grid-column:2;grid-row:1 / span 2;display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap}
+.tag .now{font-size:1.3rem;font-weight:700}
+.tag.hot .now{color:var(--drop)}
+.tag .was{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--drop);text-decoration-thickness:2px}
+.tag .pct{background:var(--ground);color:var(--ink-2);font-weight:600;font-size:.85rem;padding:1px 8px;border-radius:6px}
+.tag.hot .pct{background:var(--drop-soft);color:var(--drop)}
+/* competitors */
+ul.rivals{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+ul.rivals li{background:var(--surface);border-radius:var(--radius);padding:16px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.rival-name{font-weight:600;font-size:1.05rem;text-decoration:none}
+.rival-name:hover{text-decoration:underline}
+.meta{color:var(--ink-2);font-size:.9rem}
+.meta b{color:var(--ink);font-weight:600}
+.meta .hot{color:var(--drop);font-weight:600}
+.grow{flex:1;min-width:200px}
+form.inline{display:flex;gap:10px;flex-wrap:wrap;align-items:end;background:var(--surface);padding:18px;border-radius:var(--radius)}
+label{display:grid;gap:4px;font-size:.9rem;color:var(--ink-2)}
+input,select{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-width:0}
+input[type=url],input[name=url]{min-width:260px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 18px;background:var(--ink);color:#fff;cursor:pointer}
+button.quiet{background:transparent;color:var(--ink-2);border:1px solid var(--line);font-weight:500;padding:6px 12px}
+/* catalog */
+table.cat{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden}
+table.cat th{font-weight:600;font-size:.85rem;color:var(--ink-2);text-align:start;padding:10px 14px;border-bottom:1px solid var(--line)}
+table.cat td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+table.cat tr:last-child td{border-bottom:0}
+td.num{white-space:nowrap}
+td.num .pp{display:inline-flex;gap:8px;align-items:baseline}
+td.num .was{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--drop);font-size:.9rem}
+td.num .sale{color:var(--drop);font-weight:700}
+.stock-0{color:var(--out);font-weight:600}
+.stock-x{color:var(--ink-3)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.controls input[type=search]{flex:1;min-width:200px}
+/* product */
+.price-big{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin:8px 0 4px}
+.price-big .now{font-size:2.2rem;font-weight:700}
+.price-big .now.sale{color:var(--drop)}
+.price-big .was{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--drop);text-decoration-thickness:2px;font-size:1.2rem}
+.chart{width:100%;height:auto;background:var(--surface);border-radius:var(--radius);display:block}
+.chart .now{fill:none;stroke:var(--ink);stroke-width:2.5}
+.chart .was{fill:none;stroke:var(--drop);stroke-width:1.5;stroke-dasharray:4 4}
+.chart .base{stroke:var(--line)}
+.chart .ax{fill:var(--ink-3);font-size:12px;font-family:inherit}
+.back{display:inline-block;margin-bottom:12px;color:var(--ink-2);text-decoration:none}
+.settings{display:grid;gap:16px;background:var(--surface);padding:22px;border-radius:var(--radius);max-width:520px}
+@media (max-width:600px){
+  h1{font-size:1.45rem}
+  nav.tabs{margin-inline-start:0;width:100%;overflow-x:auto}
+  ol.feed li{grid-template-columns:1fr}
+  .tag{grid-column:1;grid-row:auto;margin-top:4px}
+  table.cat th:nth-child(3),table.cat td:nth-child(3){display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="{{ base or '#' }}">Seven</a>
+  {% if m %}<span class="who">{{ m.name }}</span>
+  <nav class="tabs" aria-label="{{ t('changes') }}">
+    <a href="{{ base }}" {% if page=='changes' %}aria-current="page"{% endif %}>{{ t('changes') }}</a>
+    <a href="{{ base }}/competitors" {% if page=='competitors' %}aria-current="page"{% endif %}>{{ t('competitors') }}</a>
+    <a href="{{ base }}/settings" {% if page=='settings' %}aria-current="page"{% endif %}>{{ t('settings') }}</a>
+  </nav>{% endif %}
+  <a class="lang" href="?lang={{ 'ar' if lang=='en' else 'en' }}">{{ 'العربية' if lang=='en' else 'English' }}</a>
+</div></header>
+<main><div class="wrap">{% block body %}{% endblock %}</div></main>
+</body>
+</html>

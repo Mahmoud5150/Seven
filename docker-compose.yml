@@ -1,0 +1,65 @@
+# One VPS runs everything: database, dashboard, worker, HTTPS.
+#   cp .env.example .env   # fill it in
+#   docker compose up -d --build
+# Logs: docker compose logs -f worker
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: seven
+      POSTGRES_USER: seven
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seven -d seven"]
+      interval: 10s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://seven:${POSTGRES_PASSWORD}@db:5432/seven
+    depends_on: { db: { condition: service_healthy } }
+
+  worker:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://seven:${POSTGRES_PASSWORD}@db:5432/seven
+    command: ["python", "-m", "seven", "worker"]
+    depends_on: { db: { condition: service_healthy } }
+
+  caddy:                     # HTTPS for your domain, certificate renewed automatically
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [web]
+
+  backup:                    # nightly database dump, the last 14 kept in ./backups
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes: [./backups:/backups]
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          pg_dump -h db -U seven -d seven -Fc -f /backups/seven-$$(date +%Y%m%d).dump
+          ls -1t /backups/seven-*.dump | tail -n +15 | xargs -r rm --
+          sleep 86400
+        done
+    depends_on: { db: { condition: service_healthy } }
+
+volumes:
+  pgdata:
+  caddy_data:

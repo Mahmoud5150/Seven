@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings') }} · Seven{% endblock %}
+{% block body %}
+<h1>{{ t('settings') }}</h1>
+{% if note %}<p class="note" role="status">{{ t(note) }}</p>{% endif %}
+<form class="settings" method="post" action="{{ base }}/settings">
+  <label>{{ t('whatsapp_number') }}<input name="phone" value="{{ m.phone or '' }}" inputmode="tel" placeholder="05xxxxxxxx" dir="ltr"></label>
+  <label>{{ t('email') }}<input name="email" type="email" value="{{ m.email or '' }}" dir="ltr"></label>
+  <label>{{ t('digest_hour') }}<select name="digest_hour">{% for h in range(24) %}<option value="{{ h }}" {% if h==m.digest_hour %}selected{% endif %}>{{ '%02d'|format(h) }}:00</option>{% endfor %}</select></label>
+  <label>{{ t('big_move') }}<input name="big_move_pct" type="number" min="1" max="90" step="1" value="{{ '%g'|format(m.big_move_pct) }}"></label>
+  <label>{{ t('language') }}<select name="lang"><option value="ar" {% if m.lang!='en' %}selected{% endif %}>العربية</option><option value="en" {% if m.lang=='en' %}selected{% endif %}>English</option></select></label>
+  <button type="submit">{{ t('save') }}</button>
+</form>
+{% endblock %}
