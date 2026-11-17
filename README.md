@@ -15,7 +15,7 @@ cd C:\Users\Mahmoud\Desktop\Career\fire_engine\Discount
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
-python -m pytest                     # 71 passed (storage tests run on SQLite and a real PostgreSQL)
+python -m pytest                     # 77 passed (storage tests run on SQLite and a real PostgreSQL)
 
 python -m seven merchant add "آرتست هب" --phone 05xxxxxxxx --email you@example.com
 python -m seven watch 1 salla.sa/coffee_souq --label "سوق القهوة"
@@ -68,6 +68,17 @@ WhatsApp rules this is built around: template parameters can't contain newlines,
 
 Template texts and sample values to submit to Meta: [docs/whatsapp_templates.md](docs/whatsapp_templates.md).
 
+## Web Bot Auth (`seven/botauth.py`)
+
+Shopify throttles unsigned bots hardest. Every request we send can carry an Ed25519 signature
+(RFC 9421, Cloudflare's Web Bot Auth profile) naming our domain; our public key is served at
+`/.well-known/http-message-signatures-directory`. It switches on by itself once `BOT_AUTH_KEY`
+points at a key and `PUBLIC_BASE_URL` is an `https://` domain:
+
+```bash
+docker compose run --rm worker python -m seven botkey --path /app/secrets/bot_key.pem
+```
+
 ## The worker (`seven/worker.py`)
 
 - Reads each watched store every 12 hours (`--every`); a failed read retries after 1 hour, a
@@ -105,8 +116,9 @@ seven/
   send.py       WhatsApp Cloud API, SMTP, or the local outbox
   worker.py     the always-on loop
   web/          the dashboard
+  botauth.py    Web Bot Auth request signing
   cli.py        all commands
-tests/          71 tests on fake networks; storage tests also on real PostgreSQL
+tests/          77 tests on fake networks; storage tests also on real PostgreSQL
 deploy/         Caddy (HTTPS) config
 docs/           WhatsApp template texts for Meta
 stores.txt      the 20 spike stores

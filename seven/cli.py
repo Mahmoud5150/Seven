@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 from .detect import detect_platform, normalize_store_url
+from .botauth import Signer, signer_from_env
 from .http import PoliteClient
 from .readers import read_store
 from .store import Store
@@ -51,13 +52,13 @@ def _read(client, db, url, args):
 
 def cmd_detect(args) -> None:
     base, key = normalize_store_url(args.url)
-    client = PoliteClient()
+    client = PoliteClient(signer=signer_from_env())
     r = client.get(base)
     print(f"{key}: {detect_platform(r.text) or 'unknown'} (HTTP {r.status_code})")
 
 
 def cmd_read(args) -> None:
-    client, db = PoliteClient(min_interval=args.interval), Store(args.db)
+    client, db = PoliteClient(min_interval=args.interval, signer=signer_from_env()), Store(args.db)
     res = _read(client, db, args.url, args)
     _, diff = db.save_read(res)
     print(f"{res.store} [{res.platform}] {len(res.products)} products, "
@@ -83,7 +84,7 @@ def cmd_spike(args) -> None:
     urls = _load_store_list(args.stores)
     if not urls:
         sys.exit(f"No store URLs in {args.stores}. Add one per line.")
-    client, db = PoliteClient(min_interval=args.interval), Store(args.db)
+    client, db = PoliteClient(min_interval=args.interval, signer=signer_from_env()), Store(args.db)
     REPORTS.mkdir(exist_ok=True)
     rows, samples, all_events = [], [], []
     rng = random.Random(42)                            # same sample every run = comparable
@@ -216,7 +217,8 @@ def cmd_worker(args) -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)       # one line per read, not per request
     settings = Settings(read_every_hours=args.every, dashboard_base=_base(), stock_pages=args.stock_pages)
-    w = Worker(Store(args.db), PoliteClient(min_interval=args.interval), senders_from_env(), settings)
+    w = Worker(Store(args.db), PoliteClient(min_interval=args.interval, signer=signer_from_env()),
+               senders_from_env(), settings)
     if args.once:
         print(w.tick())
     else:
@@ -229,6 +231,18 @@ def cmd_web(args) -> None:
     import uvicorn
     os.environ.setdefault("DATABASE_URL", args.db)
     uvicorn.run("seven.web.app:app", host=args.host, port=args.port)
+
+
+def cmd_botkey(args) -> None:
+    """Create our Web Bot Auth key (once) and show what stores will see."""
+    from pathlib import Path
+    if not Path(args.path).exists():
+        Signer.create_key_file(args.path)
+        print(f"created {args.path}  (private: keep it secret, never commit it)")
+    s = Signer.from_file(args.path, _base())
+    print(f"keyid:     {s.keyid}\npublic key directory: {_base()}/.well-known/http-message-signatures-directory")
+    if not _base().startswith("https://"):
+        print("note: requests are signed only once PUBLIC_BASE_URL is your https domain")
 
 
 def _base() -> str:
@@ -278,7 +292,13 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--host", default="127.0.0.1"); p.add_argument("--port", type=int, default=8000)
     p.set_defaults(fn=cmd_web)
 
+    p = sub.add_parser("botkey", help="create the Web Bot Auth signing key")
+    p.add_argument("--path", default=os.environ.get("BOT_AUTH_KEY", "secrets/bot_key.pem"))
+    p.set_defaults(fn=cmd_botkey)
+
     args = ap.parse_args(argv)
+    if args.cmd == "botkey":
+        Path(args.path).parent.mkdir(parents=True, exist_ok=True)
     if args.cmd == "merchant" and args.action == "add" and not args.name:
         ap.error("merchant add needs a name")
     args.fn(args)

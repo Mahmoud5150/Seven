@@ -232,6 +232,20 @@ def admin_add(key: str = Form(...), name: str = Form(...), phone: str = Form("")
         store.close()
 
 
+@app.get("/.well-known/http-message-signatures-directory")
+def key_directory(request: Request):
+    """Our Web Bot Auth public key, so stores can verify our signed requests."""
+    from fastapi.responses import Response
+
+    from ..botauth import signer_from_env
+    signer = signer_from_env()
+    if signer is None:
+        raise HTTPException(404, "Not found")
+    body, headers = signer.directory(request.headers.get("host", ""))
+    return Response(content=body, headers=headers,
+                    media_type="application/http-message-signatures-directory+json")
+
+
 @app.get("/healthz")
 def healthz():
     store = db()

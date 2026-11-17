@@ -7,5 +7,5 @@
 5. **Server:** rent a small VPS (2 vCPU / 4 GB) **located in Saudi Arabia** (Salla hides VAT from foreign IPs, which would cause false alerts), point a domain or subdomain at it (e.g. `seven.albahrani.dev`), install Docker, clone the repo, `cp .env.example .env`, fill it in, `docker compose up -d --build`.
 6. **Legal:** a short opinion from a Saudi lawyer on reading public store data (plan: Risks).
 7. **Beta:** recruit ~15 merchants. Using Artist Hub's contacts needs your CEO's approval first. Add them at `/admin?key=<ADMIN_TOKEN>` and send each their dashboard link.
-8. **Shopify:** Shopify blocks unsigned bots (8+ hours and counting). Once the domain is live, ask Claude to add Web Bot Auth signing (needs the domain to host our public key). If signed limits are still too low, apply for more capacity via Shopify's bot form.
+8. **Shopify:** request signing is built. After step 5, run the `botkey` command from the README once, set `BOT_AUTH_KEY` in `.env`, restart. Then ask Claude to check the Shopify stores again. If signed limits are still too low, apply for more capacity via Shopify's bot form.
 9. Delete the `_to_delete/` folder (old broken database files).

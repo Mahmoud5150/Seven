@@ -8,3 +8,5 @@ backups/
 debug/
 outbox.jsonl
 reports/
+secrets/
+*.pem

@@ -20,6 +20,7 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env
+    volumes: ["./secrets:/app/secrets:ro"]
     environment:
       DATABASE_URL: postgresql://seven:${POSTGRES_PASSWORD}@db:5432/seven
     depends_on: { db: { condition: service_healthy } }
@@ -31,6 +32,7 @@ services:
     environment:
       DATABASE_URL: postgresql://seven:${POSTGRES_PASSWORD}@db:5432/seven
     command: ["python", "-m", "seven", "worker"]
+    volumes: ["./secrets:/app/secrets"]
     depends_on: { db: { condition: service_healthy } }
 
   caddy:                     # HTTPS for your domain, certificate renewed automatically

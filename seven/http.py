@@ -39,6 +39,7 @@ class PoliteClient:
         respect_robots: bool = True,
         transport: httpx.BaseTransport | None = None,   # tests inject a fake network here
         group_intervals: dict[str, float] | None = None,
+        signer=None,                                     # botauth.Signer: Web Bot Auth on every request
     ) -> None:
         self.min_interval = min_interval
         self.respect_robots = respect_robots
@@ -47,7 +48,9 @@ class PoliteClient:
             timeout=timeout,
             follow_redirects=True,
             transport=transport,
+            event_hooks={"request": [self._sign]} if signer else None,
         )
+        self.signer = signer
         self._last_hit: dict[str, float] = {}     # pace key -> time of our last request
         # Hosts that share one pace (e.g. every Shopify store: Shopify limits us per IP
         # across all its stores). pace key = group name for grouped hosts, else the host.
@@ -60,6 +63,13 @@ class PoliteClient:
         self.bytes_received = 0
 
     # ---------- internals ----------
+
+    def _sign(self, request: httpx.Request) -> None:
+        """Runs just before each request leaves (redirect hops too): add Web Bot Auth headers
+        for the exact host we're talking to."""
+        url = request.url
+        authority = url.host if url.port is None else f"{url.host}:{url.port}"
+        request.headers.update(self.signer.request_headers(authority))
 
     def set_group(self, host: str, group: str) -> None:
         """Make `host` share one request pace with every other host in `group`."""
