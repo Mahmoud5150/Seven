@@ -151,3 +151,17 @@ and Shopify's docs say signed bots get higher rate limits while unsigned ones ar
 strictly; no Cloudflare enrollment is needed, and bots needing more capacity can apply through a
 Shopify form. So the fix is signing our requests (an Ed25519 key, HTTP Message Signatures, our
 public key served from our domain), not changing IP or User-Agent. Needs the domain first.
+
+### Second spike, and why the server must be in Saudi Arabia (2026-11-17, evening)
+
+Run from a US server first: coffee_souq showed 293 "price drops", every one exactly -13.1%.
+That is 15% VAT taken off. **Salla shows prices without VAT to visitors outside Saudi Arabia**
+(same product: 2,399 SAR from a Saudi IP, 2,086.09 from a US IP), decided by IP alone; no request
+header changes it. Mixing locations would fire false alerts on every taxable product.
+**Run the readers from a Saudi IP: the VPS must be in Saudi Arabia.**
+
+Re-run from a Saudi IP, about 19 hours after the baseline (15 Salla and Zid stores; Shopify skipped,
+still blocking unsigned bots): 61 real changes: 59 new products, 1 price rise (villagemarket tea
+32.00 -> 32.95), 1 discount ended (coffee_souq, relisted the same coffee as a separate discounted
+product). 0 false price or discount alerts on Zid. Sold-out alerts need two reads in a row, so
+the third run is the first that can show them.
