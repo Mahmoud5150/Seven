@@ -141,3 +141,27 @@ All 20 stores in `stores.txt` were opened in a real browser and the readers' fir
 - **Zid stock:** the default theme marks sold-out cards (60/60 correct). Custom themes (4 of 5 stores) need product pages: `--stock-pages` per read, most overdue first, so a sold-out alert on those stores can lag by several reads.
 - **Byte counts are now over the wire** (compressed), which is what a proxy bills. Salla API page: 10.6 KB on the wire vs 116 KB decompressed.
 - **Shopify is still blocking us** 30+ minutes after the spike, despite `Retry-After: 60`. How long the block lasts, and what pace Shopify tolerates, is the next thing to measure, from a fresh start tomorrow.
+
+### Shopify block explained (2026-11-17, morning)
+
+Eight hours after the spike, Shopify still answered 429 to single requests from our IP. Home page
+and sitemap load (200); product pages and `/products.json` don't (429). Shopify's own agent page
+(`/agents.md` on every store) says server-to-server bots must sign requests with **Web Bot Auth**,
+and Shopify's docs say signed bots get higher rate limits while unsigned ones are limited most
+strictly; no Cloudflare enrollment is needed, and bots needing more capacity can apply through a
+Shopify form. So the fix is signing our requests (an Ed25519 key, HTTP Message Signatures, our
+public key served from our domain), not changing IP or User-Agent. Needs the domain first.
+
+### Second spike, and why the server must be in Saudi Arabia (2026-11-17, evening)
+
+Run from a US server first: coffee_souq showed 293 "price drops", every one exactly -13.1%.
+That is 15% VAT taken off. **Salla shows prices without VAT to visitors outside Saudi Arabia**
+(same product: 2,399 SAR from a Saudi IP, 2,086.09 from a US IP), decided by IP alone; no request
+header changes it. Mixing locations would fire false alerts on every taxable product.
+**Run the readers from a Saudi IP: the VPS must be in Saudi Arabia.**
+
+Re-run from a Saudi IP, about 19 hours after the baseline (15 Salla and Zid stores; Shopify skipped,
+still blocking unsigned bots): 61 real changes: 59 new products, 1 price rise (villagemarket tea
+32.00 -> 32.95), 1 discount ended (coffee_souq, relisted the same coffee as a separate discounted
+product). 0 false price or discount alerts on Zid. Sold-out alerts need two reads in a row, so
+the third run is the first that can show them.
